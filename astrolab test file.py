@@ -50,35 +50,57 @@ def findsources (array, minimum):
         else: i += 1
     return dict
 
-def findbrightestnum (array, n):
-    arraycopy = array.copy()
+def findbrightestnum (data, n):
+    """
+    Args:
+        data:: array
+        n:: int
+            Number of iterations.
+    Returns
+        max_array::array
+            Largest to smallest pixel values found.
+        where:: array
+            The corresponding coordinates for these values.
+    """
+    datacopy = data.copy()
     max_array = []
     where = []
     
     for i in range(n):
-        maxval = sp.amax(arraycopy)
-        where1 = sp.argmax(arraycopy) #returns index in flattened arraycopy for first occurrence of maxval
-        where2 = sp.unravel_index(where1, arraycopy.shape) #back to a 2d coord
-        arraycopy[where2[0]][where2[1]] = 0 # Marking the brightest value that has been found with a 0 
+        maxval = sp.amax(datacopy)
+        where1 = sp.argmax(datacopy) #returns index in flattened arraycopy for first occurrence of maxval
+        where2 = sp.unravel_index(where1, datacopy.shape) #back to a 2d coord
+        datacopy[where2[0]][where2[1]] = 0 # Marking the brightest value that has been found with a 0 
         where.append(where2)
         max_array.append(maxval)
         i += 1
         
     return max_array , where
 
-def findbrightestmin (array, min_lim):
-    arraycopy = array.copy()
-    i = True
+def findbrightestmin (data, min_lim):
+    """
+    Finds the largest pixel values and their coordinates up until a specified limit.
+    Args:
+        data:: array
+        min_lim:: int
+            Pixel value limit we want to stop counting at.
+    Returns:
+        max_array:: array
+            Array of maximum pixel values found
+        where:: array
+            The corresponding coordinates of these values.
+    """
+    datacopy = data.copy()
     max_array = []
     where = []
-    while i:
-        maxval = sp.amax(arraycopy)
+    while True:
+        maxval = sp.amax(datacopy)
         if maxval <= min_lim:
             break
         else:
-            where1 = sp.argmax(arraycopy) #returns index in flattened arraycopy for first occurrence of maxval
-            where2 = sp.unravel_index(where1, arraycopy.shape) #back to a 2d coord
-            arraycopy[where2[0]][where2[1]] = 0
+            where1 = sp.argmax(datacopy) #returns index in flattened arraycopy for first occurrence of maxval
+            where2 = sp.unravel_index(where1, datacopy.shape) #back to a 2d coord
+            datacopy[where2[0]][where2[1]] = 0
             where.append(where2)
             max_array.append(maxval)
             
