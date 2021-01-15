@@ -52,22 +52,24 @@ def findsources (array, minimum):
 
 def findbrightestnum (array, n):
     arraycopy = array.copy()
-    max = []
+    max_array = []
     where = []
+    
     for i in range(n):
         maxval = sp.amax(arraycopy)
         where1 = sp.argmax(arraycopy) #returns index in flattened arraycopy for first occurrence of maxval
         where2 = sp.unravel_index(where1, arraycopy.shape) #back to a 2d coord
-        arraycopy[where2[0]][where2[1]] = 0
+        arraycopy[where2[0]][where2[1]] = 0 # Marking the brightest value that has been found with a 0 
         where.append(where2)
-        max.append(maxval)
+        max_array.append(maxval)
         i += 1
-    return max, where
+        
+    return max_array , where
 
 def findbrightestmin (array, n):
     arraycopy = array.copy()
     i = True
-    max = []
+    max_array = []
     where = []
     while i:
         maxval = sp.amax(arraycopy)
@@ -78,8 +80,9 @@ def findbrightestmin (array, n):
             where2 = sp.unravel_index(where1, arraycopy.shape) #back to a 2d coord
             arraycopy[where2[0]][where2[1]] = 0
             where.append(where2)
-            max.append(maxval)
-    return max, where
+            max_array.append(maxval)
+            
+    return max_array, where
 
 background = sp.zeros((10,10), dtype = int)
 
