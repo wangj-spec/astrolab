@@ -66,14 +66,14 @@ def findbrightestnum (array, n):
         
     return max_array , where
 
-def findbrightestmin (array, n):
+def findbrightestmin (array, min_lim):
     arraycopy = array.copy()
     i = True
     max_array = []
     where = []
     while i:
         maxval = sp.amax(arraycopy)
-        if maxval <= n:
+        if maxval <= min_lim:
             break
         else:
             where1 = sp.argmax(arraycopy) #returns index in flattened arraycopy for first occurrence of maxval
