@@ -106,6 +106,51 @@ def findbrightestmin (data, min_lim):
             
     return max_array, where
 
+def rectanglecoord (array, function, uppercorner, lowercorner):
+    """
+    applies function to all coordinates in rectangle
+    :param function: any function
+    :param uppercorner: corner on top [larger y], expect an (x,y) format (x,y, indices)
+    :param lowercorner: oorner on bottom [smaller y], expect an (x,y) format (x,y indices)
+    :return: array with function applied to relevant portions
+    """
+    xu = uppercorner[0]
+    xd = lowercorner[0]
+    yu = uppercorner[1]
+    yd = lowercorner[1]
+    if xu <= xd:
+        for j in range(yu - yd + 1):
+            for i in range(xd - xu + 1):
+                array = function(array, [ yu - j , xu + i ])
+
+    elif xu > xd:
+        for j in range(yu - yd + 1):
+            for i in range(xu - xd + 1):
+                array = function(array, [ yu - j , xd + i ])
+
+    return array
+
+def mask_value(arr, coords):
+    '''
+    Args:
+        arr:: 2d masked array
+        coords: list
+            coordinates of value that are to be masked
+
+    Returns:
+        arr:: ma array
+            masked array with value masked
+    '''
+    arr = ma.array(arr)
+    arr[coords[0], coords[1]] = ma.masked
+
+    return arr
+
+def replace(array, coords):
+    array[coords[0]][coords[1]] = 20
+    return array
+
+
 background = sp.zeros((10,10), dtype = int)
 
 coords = ((1,1),(2,2) , (3,3), (4,4), (5,5), (6,6), (7,7), (8,8), (9,9), (10,9), (10,10))
