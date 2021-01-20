@@ -1,0 +1,76 @@
+def rectanglecoord (array, function, uppercorner, lowercorner):
+    """
+    applies function to all coordinates in rectangle
+    :param function: any function
+    :param uppercorner: corner on top [larger y], expect an (x,y) format (x,y, indices)
+    :param lowercorner: oorner on bottom [smaller y], expect an (x,y) format (x,y indices)
+    :return: array with function applied to relevant portions
+    """
+    xu = uppercorner[0]
+    xd = lowercorner[0]
+    yu = uppercorner[1]
+    yd = lowercorner[1]
+    if xu <= xd:
+        for j in range(yu - yd + 1):
+            for i in range(xd - xu + 1):
+                array = function(array, [ yu - j , xu + i ])
+
+    elif xu > xd:
+        for j in range(yu - yd + 1):
+            for i in range(xu - xd + 1):
+                array = function(array, [ yu - j , xd + i ])
+
+    return array
+
+
+def mask_value(arr, coords):
+    '''
+    Function masks one value in a 2d array given its cooredinates
+    Args:
+        arr:: 2d masked array
+        coords: list
+            coordinates of value that are to be masked
+            
+    Returns:
+        arr:: ma array
+            masked array with value masked
+    '''
+    arr = ma.array(arr)
+    arr[coords[0], coords[1]] = ma.masked
+    
+    return arr
+    
+
+def fixed_aperature(data, bg_lim, mask_size):
+    '''
+    Counts galaxies using a fixed aperature
+    Args:
+        data:: array
+        bg_lim:: int
+            brightness limit for when function stops counting object as a galaxy
+        mask_size:: int
+            Length of the fixed aperature mask in pixel values (square mask)
+    Returns:
+        source_coords: list
+            Coordinates of the galaxies
+        brightness_vals: list
+            list of the brightest pixel in each source.
+    '''
+    datacopy = data.copy()
+    source_coords = []
+    brightness_vals = []
+    
+    while np.amax(datacopy) > bg_lim:
+        
+        brightness_vals.append(np.amax(datacopy))
+        coords1 = np.argmax(datacopy)
+        coords2 = np.unravel_index(coords1, datacopy.shape) #2d coordinate of the brightest pixel
+        
+        source_coords.append(coords2)
+        upp_corner = [coords2[1]+mask_size, coords2[0] + mask_size] # coords2[1] used first as the first index corresponds to the x value
+        low_corner = [coords2[1]-mask_size, coords2[0] - mask_size]
+        datacopy = rectanglecoord(datacopy, mask_value, upp_corner, low_corner)
+        print(np.amax(datacopy))
+        #print(np.amax(datacopy))
+        
+    return source_coords, brightness_vals
