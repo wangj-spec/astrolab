@@ -39,6 +39,21 @@ data1dmod = data1d[data1d > 4000]
 plt.hist(data1dmod, bins = 1000)
 plt.show()
 
+subsectioncenter = (781,1478) #coordinates of center of subsection to look at 
+size = (398, 614) #shape around center of subsection to look at, of form (y dimension, x dimension)
+subsection = Cutout2D(data, subsectioncenter, size)
+
+interval = ZScaleInterval() #viewing in Zscale
+
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+ax.set_title("Subsection of sky, origin at (474,1279), galaxies down to 3468")
+ax.set_xlabel('relative x coordinates (+474)')
+ax.set_ylabel('relative y coordinates (+1279)')
+
+im = ax.imshow(interval(subsection.data), origin='lower') #plotting of image
+plt.show()
+
 hdulist.close()
 
 
