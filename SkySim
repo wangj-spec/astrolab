@@ -1,0 +1,40 @@
+from astropy.io import fits
+import numpy as np
+import matplotlib.pyplot as plt
+from astropy.modeling.models import Gaussian2D
+from astropy.modeling import models
+from time import time
+
+imshape = (300, 400)
+y, x = np.indices(imshape)
+
+np.random.seed(1)
+nsrc = 100
+model_params = [
+    dict(amplitude=np.random.uniform(1, 10),
+         x_mean=np.random.uniform(0, imshape[1] - 1),
+         y_mean=np.random.uniform(0, imshape[0] - 1),
+         x_stddev=np.random.uniform(2, 3),
+         y_stddev=np.random.uniform(2, 3),
+         theta=np.random.uniform(0, 2 * np.pi))
+    for _ in range(nsrc)]
+    
+    
+model_list = [models.Gaussian2D(**kwargs) for kwargs in model_params]
+
+full_image = np.zeros(imshape)
+
+for model in model_list:
+    model.bounding_box = None
+    model.render(full_image)
+    
+
+flux = full_image.sum()
+
+plt.figure()
+
+# Full model image
+plt.imshow(full_image, origin='lower')
+plt.xlabel('x')
+plt.ylabel('y')
+
