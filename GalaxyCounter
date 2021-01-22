@@ -125,26 +125,34 @@ def findradiusandmask(array, coordinate, cutoff = 0):
 
     return values, where, array
     
-   def findbrightestminandmaskgalaxy (array, n):
+def findbrightestminandmaskgalaxy (array,n , m, centered = False):
     """
-    find brightest pixel values down to n, for each pixel value finds a "circular" region of light 
+    find brightest pixel values down to n, for each pixel value finds a "circular" region of light
     and masks the entire region which i will call a galaxy
     :param array: 2d array to be analysed
     :param n: cutoff value below which a pixel is not counted as a source
+    :param m: cutoff value below which a pixel is counted as background
+    :param centered: return the center coordinates of the galaxy
     :return: max: 2d array containing pixel values of each galaxy
              where: 2d array containing tuples containing coordinates in (x,y) indices of each pixel in each galaxy
     """
     i = True
     max = []
-    where = []
+    centers = [] # measure the center of each galaxy
+    where = [] # coordinates of pixels in each galaxy
     while i:
         maxval = sp.amax(array)
+        print(maxval)
         if maxval <= n:
             break
         else:
             where1 = sp.argmax(array) #returns index in flattened arraycopy for first occurrence of maxval
             where2 = sp.unravel_index(where1, array.shape) #back to a 2d coord
-            values, where3, array  = findradiusandmask(array, (where2[1],where2[0]), n )
+            values, where3, array  = findradiusandmask(array, (where2[1],where2[0]), m)
+            centers.append(where2)
             where.append(where3)
             max.append(values)
-    return max, where
+    if centered == False:
+        return max, where
+    else:
+        return max, where, centers
