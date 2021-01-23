@@ -77,19 +77,19 @@ def fixed_aperature(data, bg_lim, mask_size):
 
 def findradiusandmask(array, coordinate, cutoff = 0):
     """
-    finds radius of galaxy and masks
+    finds radius of galaxy and masks, doesn't count galaxies of radius <= 2
     :param array: 2D array of data
     :param coordinate: tuple of form (x,y) x,y indices of array
     :param cutoff: value at which you decide a pixel is background noise
-    :return: returns an array containing the pixel values within the galaxy, and the coordinates making
-            up the circle of the galaxy
+    :return: returns an array containing the pixel values within the galaxy, the coordinates making
+            up the circle of the galaxy, the flux of the galaxy in pixel value
     """
     x = coordinate[0]
     y = coordinate[1]
-    center = array[y][x]
     values = []
     where = []
-    i = 1 #initialise i for the loop
+    flux = 0 # initialise a flux value
+    i = 1 #initialise i for the loozp
     while True: #radius finding
         if array.shape[0] > y+i:
             if array[y + i][x] > cutoff:
@@ -105,27 +105,44 @@ def findradiusandmask(array, coordinate, cutoff = 0):
                 radius = i - 1 #stop at threshold and record radius of values
                 break
 
+    if radius > 2:
+        raditer = radius  # initialise a radius value to iterate over
+        while raditer >= radius*(-1): #circle finding, loop over x and y coords
+            xi = raditer #initialise xi as distance along axis relative to x
+            yi = int(sp.sqrt(radius**2 - raditer**2)) #initialise yi as maximum "height" within circle
 
-    raditer = radius  # initialise a radius value to iterate over
-    while raditer >= radius*(-1): #circle finding, loop over x and y coords
-        xi = raditer #initialise xi as distance along axis relative to x
-        yi = int(sp.sqrt(radius**2 - raditer**2)) #initialise yi as maximum "height" within circle
+            while radius**2 >= xi**2 + yi**2: #scan downwards along y axis at x = x+xi, mask at each point
+                if array.shape[0] > y+yi and array.shape[1] > x+xi:
+                    values.append(array[y + yi][x + xi])
+                    where.append((x+xi,y+yi))
+                    flux += array.data[y + yi][x + xi] # sums even if there's an overlap with another galaxy (for ease
+                    array = mask_value(array, (y+yi,x+xi))
 
-        while radius**2 >= xi**2 + yi**2: #scan downwards along y axis at x = x+xi, mask at each point
-            if array.shape[0] > y+yi and array.shape[1] > x+xi:
-                values.append(array[y + yi][x + xi])
-                where.append((x+xi,y+yi))
-                array = mask_value(array, (y+yi,x+xi))
-                yi -= 1
-            else:
-                yi -= 1
+                    yi -= 1
+                else:
+                    yi -= 1
 
 
-        raditer -= 1
+            raditer -= 1
 
-    return values, where, array
+        return values, where, flux, array
+    else: #mask out all galaxies with a radius smaller than or equal to 2
+        raditer = radius  # initialise a radius value to iterate over
+        while raditer >= radius * (-1):  # circle finding, loop over x and y coords
+            xi = raditer  # initialise xi as distance along axis relative to x
+            yi = int(sp.sqrt(radius ** 2 - raditer ** 2))  # initialise yi as maximum "height" within circle
+            while radius ** 2 >= xi ** 2 + yi ** 2:  # scan downwards along y axis at x = x+xi, mask at each point
+                if array.shape[0] > y + yi and array.shape[1] > x + xi:
+                    array = mask_value(array, (y + yi, x + xi))
+                    yi -= 1
+                else:
+                    yi -= 1
+
+            raditer -= 1
+
+        return None, None, None, array
     
-def findbrightestminandmaskgalaxy (array,n , m, centered = False):
+def var_aperture (array,n , m, centered = False):
     """
     find brightest pixel values down to n, for each pixel value finds a "circular" region of light
     and masks the entire region which i will call a galaxy
@@ -135,8 +152,11 @@ def findbrightestminandmaskgalaxy (array,n , m, centered = False):
     :param centered: return the center coordinates of the galaxy
     :return: max: 2d array containing pixel values of each galaxy
              where: 2d array containing tuples containing coordinates in (x,y) indices of each pixel in each galaxy
+             fluxes: 1d array containing summed flux values of each galaxy
+             centers: (optional) the coordinates of the brightest pixel in each galaxy
     """
     i = True
+    fluxes = []
     max = []
     centers = [] # measure the center of each galaxy
     where = [] # coordinates of pixels in each galaxy
@@ -148,11 +168,34 @@ def findbrightestminandmaskgalaxy (array,n , m, centered = False):
         else:
             where1 = sp.argmax(array) #returns index in flattened arraycopy for first occurrence of maxval
             where2 = sp.unravel_index(where1, array.shape) #back to a 2d coord
-            values, where3, array  = findradiusandmask(array, (where2[1],where2[0]), m)
-            centers.append(where2)
-            where.append(where3)
-            max.append(values)
+            values, where3, lightsum, array  = findradiusandmask(array, (where2[1],where2[0]), m)
+            if values == None:
+                continue
+            else:
+                fluxes.append(lightsum)
+                centers.append(where2)
+                where.append(where3)
+                max.append(values)
     if centered == False:
-        return max, where
+        return max, where, fluxes
     else:
-        return max, where, centers
+        return max, where, fluxes, centers
+        
+def tally (array):
+    """
+    finds values in array and counts how many of each value is the array
+    :param array: array to be counted (1 dimensional)
+    :return: dictionary with values as keys as frequency as dictionary values
+    """
+
+    dict = {}
+    for i in range(len(array)):
+
+        if array[i] in dict:
+            dict[array[i]] += 1
+            i += 1
+        else:
+            dict[array[i]] = 1
+            i += 1
+
+    return dict
