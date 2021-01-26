@@ -17,7 +17,7 @@ def findradiusandmask(array, coordinate, cutoff = 0):
     """
     x = coordinate[0]
     y = coordinate[1]
-    center = array[y][x]
+    arraydata = ma.getdata(array)
     values = []
     where = []
     bg_vals = []
@@ -60,13 +60,13 @@ def findradiusandmask(array, coordinate, cutoff = 0):
                     values.append(array[y + yi][x + xi])
                     where.append((x+xi,y+yi))
                     array = mask_value(array, (y+yi,x+xi))
-                    flux += array.data[y + yi][x + xi] # sums even if there's an overlap with another galaxy (for ease
+                    flux += arraydata[y + yi][x + xi] # sums even if there's an overlap with another galaxy (for ease
                     yi -= 1
                 
                 elif radius**2 < xi ** 2 + yi ** 2 and array.shape[0] > y+yi and array.shape[1] > x+xi:
                     
                      bg_vals.append(array[y + yi][x + xi])
-                     bg_flux += array[y + yi][x + xi]
+                     bg_flux += arraydata[y + yi][x + xi]
                      #array = mask_value(array, (y+yi,x+xi))
                      yi -= 1
                 
