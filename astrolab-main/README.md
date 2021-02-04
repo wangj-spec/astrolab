@@ -1,4 +1,4 @@
-# This is the folder of Leonardo Bossi and Joseph bWang's code on astronomical image processing.
+# This is the folder of Leonardo Bossi and Joseph Wang's code on astronomical image processing.
 
 There should be four files:
 	mosaic.fits
