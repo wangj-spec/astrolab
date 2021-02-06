@@ -1,14 +1,19 @@
-from astropy.io import fits
-import scipy as sp
-import numpy as np
-import matplotlib.pyplot as plt
-import numpy.ma as ma
-from astropy.nddata import Cutout2D
-from astropy.nddata import CCDData
-from astropy.visualization import ZScaleInterval
+"""
+Created on Tue Jan 26 15:30:27 2021
 
-starcoords = [[(2161,3812),(2103,3710)], #coordinates for masking the original image by eye to remove
-              [(2445,3441),(2484,3384)], #blooming items and extremely bright stars: anything spurious
+@author: leonardobossi1
+"""
+
+from astropy.io import fits
+import numpy as np
+import numpy.ma as ma
+from astropy.nddata import CCDData
+
+#coordinates for masking the original image by eye to remove
+#blooming items, bright stars, as well as areas with high noise (edges of image)
+
+starcoords = [[(2161,3812),(2103,3710)], 
+              [(2445,3441),(2484,3384)], 
               [(2079,1452),(2097,1405)],
               [(2064,1449),(2113,1382)],
               [(2105,2335),(2158,2284)],
@@ -43,6 +48,7 @@ def openfits(filename):
     hdulist = fits.open(filename)
     data = hdulist[0].data
     header = hdulist[0].header
+    
     return data, header
 
 def openccd(filename):
@@ -53,11 +59,12 @@ def openccd(filename):
     """
     ccd = CCDData.read(filename)
     maskedarray = np.asanyarray(ccd)
+    
     return maskedarray
 
 def rectanglecoord (array, function, uppercorner, lowercorner):
     """
-    applies function to all coordinates in rectangle
+    applies input function to all coordinates in rectangle
     :param function: any function
     :param uppercorner: corner on top [larger y], expect an (x,y) format (x,y, indices)
     :param lowercorner: oorner on bottom [smaller y], expect an (x,y) format (x,y indices)
@@ -124,6 +131,10 @@ def fixed_aperture(data, bg_lim, mask_size):
             Coordinates of the galaxies
         brightness_vals: list
             list of the brightest pixel in each source.
+        tot_galaxies:: int
+            Number of galaxies counted
+        datacopy::array
+            Masked image
     '''
     datacopy = data.copy()
     source_coords = []
@@ -139,10 +150,10 @@ def fixed_aperture(data, bg_lim, mask_size):
         upp_corner = [coords2[1]+mask_size, coords2[0] + mask_size] # coords2[1] used first as the first index corresponds to the x value
         low_corner = [coords2[1]-mask_size, coords2[0] - mask_size]
         datacopy = rectanglecoord(datacopy, mask_value, upp_corner, low_corner)
-        print(np.amax(datacopy))
-        #print(np.amax(datacopy))
         
-    return source_coords, brightness_vals
+    tot_galaxies = len(brightness_vals)
+    
+    return source_coords, brightness_vals, tot_galaxies, datacopy
 
 def findradiusandmask(array, coordinate, cutoff=0):
     """
@@ -156,7 +167,6 @@ def findradiusandmask(array, coordinate, cutoff=0):
     x = coordinate[0]
     y = coordinate[1]
     mask = ma.getmask(array)
-    print(mask)
     arraydata = ma.getdata(array)
     values = []
     where = []
@@ -191,7 +201,7 @@ def findradiusandmask(array, coordinate, cutoff=0):
                 rad_bg = i + 1
 
                 break
-    print(radius)
+            
     is0 = False # initialise is0 trigger: ignore galaxy if there is a zero value in it, it is a galaxy at the border of the image
     if radius > 2:  # Ensuring we only count the galaxy if it has a radius larger than 2, as a lower radius likely indicates noise.
 
@@ -223,6 +233,7 @@ def findradiusandmask(array, coordinate, cutoff=0):
                     yi -= 1
 
             raditer -= 1
+            
         if is0:
             return None, None, None, None, array
         else:
@@ -270,14 +281,14 @@ def var_aperture(array, source_lim, rad_lim, centered=False):
     where = []  # coordinates of pixels in each galaxy
     while i:
         maxval = np.amax(array)
-        print(maxval)
+        print('pixel value of galaxy = '+str(maxval))
         if maxval <= source_lim:
             break
 
         else:
             where1 = np.argmax(array)  # returns index in flattened arraycopy for first occurrence of maxval
             where2 = np.unravel_index(where1, array.shape)  # back to a 2d coord
-            print(where2)
+            print('location of galaxy = ' +str(where2))
 
             values, where3, lightsum, bg_values, array = findradiusandmask(array, (where2[1], where2[0]), rad_lim)
 
@@ -318,3 +329,36 @@ def tally(array):
             i += 1
 
     return dict
+
+
+def find_index(m_low, m_high, m_array):
+    '''
+    Args:
+        m_low::float
+        m_high::float
+            The lower and higher limits of the magnitude bin.
+        m_array::array
+            Array of data scanning through.
+    Returns:
+        j::float
+        h::float
+            The corresponding indices the edges of the bins refers to.
+    '''
+    j = 0
+    h = len(m_array) - 1
+    
+    if m_low <= m_array[len(m_array)-1]:
+        j = len(m_array)-1
+    else:
+        while m_array[j] >= m_low: 
+            j += 1
+    
+    if m_high >= m_array[0]:
+        h = 0 
+    else:
+        while  m_array[h] <= m_high:
+            h -= 1
+
+    return j, h
+
+
