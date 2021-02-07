@@ -49,7 +49,7 @@ def imagetaker(arr, indices, size = (400, 600)):
 
 region1 = imagetaker(sky_data, [1161, 1956])
 region2 = imagetaker(sky_data, [1279, 474])
-
+"""
 fixed_test = gal.fixed_aperture(region1.data, 3418, 20)
 
 fig = plt.figure()
@@ -59,7 +59,46 @@ ax.set_xlabel('relative x coordinates')
 ax.set_ylabel('relative y coordinates')
 im = ax.imshow(interval(fixed_test.data), origin='lower')
 plt.show()
+"""
 
+#%%
+# testing the variable counter on 2 subsections of the full image
+sourcelim = 3500    # Galaxy identification limit
+radiuslim = 3443    # Masking radius limit
+minsize = 2 # initialise mininimum size of galaxy identification easy to change for testing
+galaxyvals, galaxylocales, galaxyfluxes, centers, maskedregion = gal.var_aperture(region1.data, sourcelim, radiuslim, True, minsize)
+centerx = [] #Compiling x coordinates of center pixels
+centery = [] #Compiling y coordinates of center pixels
+for coord in centers:
+    centerx.append(coord[1])
+    centery.append(coord[0])
+
+interval = ZScaleInterval()
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+ax.set_title("Test region cutout")
+ax.set_xlabel('relative x coordinates (+1956)')
+ax.set_ylabel('relative y coordinates (+1161)')
+im = ax.imshow(interval(maskedregion), origin='lower')
+plt.scatter(centerx, centery, color="r") # plots the centerpoint of each galaxy detected on the graph
+plt.show()
+
+galaxyvals2, galaxylocales2, galaxyfluxes2, centers2, maskedregion2 = gal.var_aperture(region2.data, sourcelim, radiuslim, True, minsize)
+centerx2 = [] #Compiling x coordinates of center pixels
+centery2 = [] #Compiling y coordinates of center pixels
+for coord in centers2:
+    centerx2.append(coord[1])
+    centery2.append(coord[0])
+
+interval = ZScaleInterval()
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+ax.set_title("Test region cutout")
+ax.set_xlabel('relative x coordinates (+474)')
+ax.set_ylabel('relative y coordinates (+1279)')
+im = ax.imshow(interval(maskedregion2), origin='lower')
+plt.scatter(centerx2, centery2, color="r") # plots the centerpoint of each galaxy detected on the graph
+plt.show()
 
 #%%
 # Testing variable counter using 2D Gaussian model for a galaxy on a simulated sky
