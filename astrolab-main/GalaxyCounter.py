@@ -167,7 +167,7 @@ def findradiusandmask(array, coordinate, minsize, cutoff=0):
     """
     x = coordinate[0]
     y = coordinate[1]
-    mask = ma.getmask(array)
+    mask = ma.getmaskarray(array)
     arraydata = ma.getdata(array)
     values = []
     where = []
