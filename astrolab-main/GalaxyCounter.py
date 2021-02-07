@@ -301,7 +301,6 @@ def var_aperture(array, source_lim, rad_lim, centered=False, minsize=2):
             else:
                 bg_av = np.median(bg_values)
                 values = [e - bg_av for e in values]
-                print(lightsum - len(values) * bg_av)
                 fluxes.append(lightsum - len(values) * bg_av)
                 centers.append(where2)
                 where.append(where3)
