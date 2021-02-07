@@ -56,6 +56,7 @@ plt.grid()
 
 # Scanning the image with variable aperature
 galaxyvals, galaxylocales, galaxyfluxes, data = gal.var_aperture(data, sourcelim, radiuslim)
+print('Total number of galaxies detected = '+str(len(galaxyvals)))
 
 # Apparent magnitude calculated using provided calibration
 magnitudes = header["magzpt"] + (-1*2.5) * np.log10(galaxyfluxes) 
