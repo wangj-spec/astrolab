@@ -155,12 +155,13 @@ def fixed_aperture(data, bg_lim, mask_size):
     
     return source_coords, brightness_vals, tot_galaxies, datacopy
 
-def findradiusandmask(array, coordinate, cutoff=0):
+def findradiusandmask(array, coordinate, minsize, cutoff=0):
     """
     finds radius of galaxy and masks
     :param array: 2D array of data
     :param coordinate: tuple of form (x,y) x,y indices of array
     :param cutoff: value at which you decide a pixel is background noise
+    :param minsize: minimum size of galaxy counted
     :return: returns an array containing the pixel values within the galaxy, and the coordinates making
             up the circle of the galaxy
     """
@@ -173,7 +174,9 @@ def findradiusandmask(array, coordinate, cutoff=0):
     bg_vals = []
     flux = 0  # initialise a flux value
     i = 1  # initialise i for the loop
-    if array[y][x] > 5000:
+    if array[y][x] > 5000:  # failsafe cutoff size for galaxies: no galaxy is likely to be this large,
+                            # especially if the brightest value is not so bright, so any galaxy found to be too large
+                            # is deemed an error and a fixed aperture method is used
         radlim = 50
     else:
         radlim = 30
@@ -203,7 +206,7 @@ def findradiusandmask(array, coordinate, cutoff=0):
                 break
             
     is0 = False # initialise is0 trigger: ignore galaxy if there is a zero value in it, it is a galaxy at the border of the image
-    if radius > 2:  # Ensuring we only count the galaxy if it has a radius larger than 2, as a lower radius likely indicates noise.
+    if radius > minsize:  # Ensuring we only count the galaxy if it has a radius larger than minsize, as a lower radius likely indicates noise.
 
         raditer = rad_bg  # initialise a radius value to iterate over
         while raditer >= (-1) * rad_bg:  # circle finding, loop over x and y coords
@@ -239,7 +242,7 @@ def findradiusandmask(array, coordinate, cutoff=0):
         else:
             return values, where, flux, bg_vals, array
 
-    elif radius <= 2:  # mask out all galaxies with a radius smaller than or equal to 2
+    elif radius <= minsize:  # mask out all galaxies with a radius smaller than or equal to minsize
 
         raditer = radius  # initialise a radius value to iterate over
 
@@ -261,15 +264,15 @@ def findradiusandmask(array, coordinate, cutoff=0):
         return None, None, None, None, array
 
 
-def var_aperture(array, source_lim, rad_lim, centered=False):
+def var_aperture(array, source_lim, rad_lim, centered=False, minsize=2):
     """
     find brightest pixel values down to n, for each pixel value finds a "circular" region of light
     and masks the entire region which i will call a galaxy
     :param array: 2d array to be analysed
     :param n: cutoff value below which a pixel is not counted as a source
     :param m: cutoff value below which a pixel is counted as background
-    :param centered: return the center coordinates of the galaxy
-
+    :param centered: return the center coordinates of the galaxy, default to False
+    :param minsize: define the minimum radius size of galaxies being counted, default to 2
     :return: max_vals: 2d array containing pixel values of each galaxy
              where: 2d array containing tuples containing coordinates in (x,y) indices of each pixel in each galaxy
              fluxes: 1d array containing summed flux values of each galaxy
@@ -290,7 +293,7 @@ def var_aperture(array, source_lim, rad_lim, centered=False):
             where2 = np.unravel_index(where1, array.shape)  # back to a 2d coord
             print('location of galaxy = ' +str(where2))
 
-            values, where3, lightsum, bg_values, array = findradiusandmask(array, (where2[1], where2[0]), rad_lim)
+            values, where3, lightsum, bg_values, array = findradiusandmask(array, (where2[1], where2[0]), minsize, rad_lim)
 
             if values == None:
                 continue
