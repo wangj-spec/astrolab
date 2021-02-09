@@ -11,13 +11,14 @@ from astropy.stats import bootstrap
 from astropy.utils import NumpyRNGContext
 from astropy.nddata import CCDData
 from scipy.optimize import curve_fit
+from astropy.visualization import ZScaleInterval
 
 sourcelim = 3500    # Galaxy identification limit
 radiuslim = 3443    # Masking radius limit
 
 # Masking unwanted areas of images and saving the file.
 original_data, header = gal.openfits("mosaic.fits")
-maskeddata = gal.maskstars(original_data) 
+#maskeddata = gal.maskstars(original_data)
 data = gal.openccd("starsmasked.fits")
 
 data1dmod = original_data[original_data < 6000] # removing values larger than 6000  
@@ -52,12 +53,19 @@ plt.xlabel('Value of pixel')
 plt.ylabel('Occurance frequency')
 plt.legend(loc=1)
 plt.grid()
-
+plt.show()
 
 # Scanning the image with variable aperature
 galaxyvals, galaxylocales, galaxyfluxes, data = gal.var_aperture(data, sourcelim, radiuslim)
-print('Total number of galaxies detected = '+str(len(galaxyvals)))
 
+interval = ZScaleInterval()
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+ax.set_title("Full image masked")
+ax.set_xlabel('relative x coordinates')
+ax.set_ylabel('relative y coordinates')
+im = ax.imshow(interval(data), origin='lower')
+plt.show()
 # Apparent magnitude calculated using provided calibration
 magnitudes = header["magzpt"] + (-1*2.5) * np.log10(galaxyfluxes) 
 
@@ -81,6 +89,7 @@ lognm = np.log10(nm)
 # Scatter plot of resulting data 
 plt.figure()
 
+
 # ignore last datapoint as this will be infinity (N=0 for last datapoint)
 plt.scatter(mpix[:-1], lognm[:-1], label='Data points plotted using variable aperature galaxy counter')
 z = np.polyfit(mpix[1000:1700], lognm[1000:1700], 1) # Linear fit for m = 14 - 16.5 region
@@ -99,6 +108,9 @@ plt.show()
 # Binning values 
 m_vals, data = [mpix[:-1], lognm[:-1]]
 
+print(data)
+print(m_vals)
+
 m_binned = []
 vals_binned=[]
 
@@ -108,13 +120,14 @@ for i in np.arange(10.5, 24.0, 0.5):
     m_binned.append((2*i + 0.5)/2)
 
     vals_binned.append(np.mean(data[lower:upper]))
+    print(data[lower:upper])
     
 plt.figure()
 plt.scatter(m_binned, vals_binned, label='Binned data points from scanning full image', marker='x')
 
 # Extracting the values before the gradient begins to flatten due to all the
 # galaxies being counted     
-z1 = np.polyfit(m_binned[0:8], vals_binned[0:8], 1)
+z1 = np.polyfit(m_binned[1:9], vals_binned[1:9], 1)
 
 
 y_vals = [e * z1[0] for e in m_binned]
@@ -251,9 +264,8 @@ plt.plot(m_binned ,  y_vals + z1[1], color='k', \
 plt.xlabel('Magnitude')
 plt.ylabel('$Log_{10}$N(m)')
 plt.legend()
-plt.show()
 plt.grid()
-
+plt.show()
 
 # Adding the Possion error in N(m)
 N_vals = [10 ** e for e in vals_binned]
@@ -264,11 +276,15 @@ tot_err = err + perr[0:len(m)]
 
 plt.figure()
 
+plt.plot(m_binned ,  y_vals + z1[1], color='k', \
+         label = 'Linear plot with gradient = '+str(round(z1[0],2)))
 plt.errorbar(m, vals_binned[0:len(m)], yerr = tot_err, fmt='kx', capsize=2)
 plt.title('Plot with correlation error from bootstrapping added with the Poisson error')
 plt.xlabel('Magnitude')
 plt.ylabel('$Log_{10}$N(m)')
+plt.xlim(right = 22)
 plt.grid()
+plt.show()
 
 
 
