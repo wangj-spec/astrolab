@@ -216,13 +216,13 @@ def findradiusandmask(array, coordinate, minsize, cutoff=0):
 
             while rad_bg ** 2 >= xi ** 2 + yi ** 2:  # scan downwards along y axis at x = x+xi, mask at each point
 
-                if array.shape[0] > y + yi and array.shape[1] > x + xi and radius ** 2 >= xi ** 2 + yi ** 2:
+                if array.shape[0] > y + yi and array.shape[1] > x + xi and radius ** 2 >= xi ** 2 + yi ** 2 and mask[y+yi][x+xi] == False:
                     if arraydata[y+yi][x+xi] == 0:
                         is0 = True
                     values.append(array[y + yi][x + xi])
                     where.append((x + xi, y + yi))
                     array = mask_value(array, (y + yi, x + xi))
-                    flux += arraydata[y + yi][x + xi]  # sums even if there's an overlap with another galaxy (for ease
+                    flux += arraydata[y + yi][x + xi]  
                     yi -= 1
 
                 elif radius ** 2 < xi ** 2 + yi ** 2 and array.shape[0] > y + yi and array.shape[1] > x + xi and mask[y+yi][x+xi] == False:
@@ -298,9 +298,14 @@ def var_aperture(array, source_lim, rad_lim, centered=False, minsize=2):
             if values == None:
                 continue
 
+            bg_av = np.median(bg_values)
+            values = [e - bg_av for e in values]
+            print(lightsum - len(values) * bg_av)
+            if lightsum - len(values) * bg_av < 0: #if the overall flux counted comes out to be
+                                                  # negative, this is a clearly unphysical result
+                                                    # which is due to the flaws in our method
+                continue
             else:
-                bg_av = np.median(bg_values)
-                values = [e - bg_av for e in values]
                 fluxes.append(lightsum - len(values) * bg_av)
                 centers.append(where2)
                 where.append(where3)
