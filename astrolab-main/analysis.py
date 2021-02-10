@@ -127,7 +127,7 @@ plt.scatter(m_binned, vals_binned, label='Binned data points from scanning full 
 
 # Extracting the values before the gradient begins to flatten due to all the
 # galaxies being counted     
-z1 = np.polyfit(m_binned[1:9], vals_binned[1:9], 1)
+z1 = np.polyfit(m_binned[0:11], vals_binned[0:11], 1)
 
 
 y_vals = [e * z1[0] for e in m_binned]
@@ -277,12 +277,13 @@ tot_err = err + perr[0:len(m)]
 plt.figure()
 
 plt.plot(m_binned ,  y_vals + z1[1], color='k', \
-         label = 'Linear plot with gradient = '+str(round(z1[0],2)))
+         label = 'Linear plot with gradient = '+str(round(z1[0],3)))
 plt.errorbar(m, vals_binned[0:len(m)], yerr = tot_err, fmt='kx', capsize=2)
 plt.title('Plot with correlation error from bootstrapping added with the Poisson error')
 plt.xlabel('Magnitude')
 plt.ylabel('$Log_{10}$N(m)')
-plt.xlim(right = 22)
+plt.xlim(10,21)
+plt.ylim(1,3.6)
 plt.grid()
 plt.show()
 
