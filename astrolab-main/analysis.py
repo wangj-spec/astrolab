@@ -267,18 +267,11 @@ plt.legend()
 plt.grid()
 plt.show()
 
-# Adding the Possion error in N(m)
-N_vals = [10 ** e for e in vals_binned]
-
-perr = 1/ (np.log(10) * np.array(N_vals) ** (1/2))
-
-tot_err = err + perr[0:len(m)]
-
 plt.figure()
 
 plt.plot(m_binned ,  y_vals + z1[1], color='k', \
          label = 'Linear plot with gradient = '+str(round(z1[0],3)))
-plt.errorbar(m, vals_binned[0:len(m)], yerr = tot_err, fmt='kx', capsize=2)
+plt.errorbar(m, vals_binned[0:len(m)], yerr = err, fmt='kx', capsize=2)
 plt.title('Plot with correlation error from bootstrapping added with the Poisson error')
 plt.xlabel('Magnitude')
 plt.ylabel('$Log_{10}$N(m)')
