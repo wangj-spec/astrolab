@@ -65,9 +65,12 @@ def openccd(filename):
 def rectanglecoord (array, function, uppercorner, lowercorner):
     """
     applies input function to all coordinates in rectangle
-    :param function: any function
-    :param uppercorner: corner on top [larger y], expect an (x,y) format (x,y, indices)
-    :param lowercorner: oorner on bottom [smaller y], expect an (x,y) format (x,y indices)
+    Args:
+      function: any function
+      uppercorner: list
+        corner on top [larger y], expect an (x,y) format (x,y, indices)
+      lowercorner: list
+        corner on bottom [smaller y], expect an (x,y) format (x,y indices)
     :return: array with function applied to relevant portions
     """
     xu = uppercorner[0]
@@ -107,7 +110,8 @@ def mask_value(arr, coords):
 def maskstars(arr):
     """
     masks stars according to the star coordinates in this file.
-    :param arr: 2D array of the data [pixel counts] of the fits image
+    Args:     
+     arr: 2D array of the data [pixel counts] of the fits image
     :return: maskedarray: 2D masked array of the image
     """
     for coord in starcoords:
@@ -158,12 +162,26 @@ def fixed_aperture(data, bg_lim, mask_size):
 def findradiusandmask(array, coordinate, minsize, cutoff=0):
     """
     finds radius of galaxy and masks
-    :param array: 2D array of data
-    :param coordinate: tuple of form (x,y) x,y indices of array
-    :param cutoff: value at which you decide a pixel is background noise
-    :param minsize: minimum size of galaxy counted
-    :return: returns an array containing the pixel values within the galaxy, and the coordinates making
-            up the circle of the galaxy
+    Args:
+      array: np.array
+        2D array of the data
+      coordinate: tuple
+        tuple of form (x,y) x,y indices of array
+      cutoff: float
+        value at which you decide a pixel is background noise
+      minsize: int
+        minimum size of galaxy counted ( radii lower than these are not counted as galaxies).
+    Returns:
+      values:: np.array
+        Individual pixel values of the galaxy 
+      where:: np.array
+        Coordinates of the pixels within the galaxy
+      flux:: float
+        Total summed pixel count of the total light emitted from the galaxy
+      bg_vals:: np.array
+        Array of background values for that galaxy
+      array:: ma.array
+        Input array with detected galaxy masked.
     """
     x = coordinate[0]
     y = coordinate[1]
@@ -268,14 +286,26 @@ def var_aperture(array, source_lim, rad_lim, centered=False, minsize=2):
     """
     find brightest pixel values down to n, for each pixel value finds a "circular" region of light
     and masks the entire region which i will call a galaxy
-    :param array: 2d array to be analysed
-    :param n: cutoff value below which a pixel is not counted as a source
-    :param m: cutoff value below which a pixel is counted as background
-    :param centered: return the center coordinates of the galaxy, default to False
-    :param minsize: define the minimum radius size of galaxies being counted, default to 2
-    :return: max_vals: 2d array containing pixel values of each galaxy
-             where: 2d array containing tuples containing coordinates in (x,y) indices of each pixel in each galaxy
-             fluxes: 1d array containing summed flux values of each galaxy
+    Args:
+      array: ma.array
+        2d  masked array to be analysed
+      source_lim:: float
+        cutoff value below which a pixel is not counted as a source
+      rad_lim:: float
+        cutoff value below which a pixel is counted as background
+      centered: Bool
+        If true, function also return the center coordinates of the galaxy, default to False
+      minsize: int
+        define the minimum radius size of galaxies being counted, default to 2 pixels.
+    Returns:
+      max_vals: np.array
+        2d array containing pixel values of each galaxy
+      where: np.array
+        2d array containing tuples containing coordinates in (x,y) indices of each pixel in each galaxy
+      fluxes: np.array
+        1d array containing summed flux values of each galaxy
+      array:: ma.array
+        Original array after masking 
     """
     i = True
     max_vals = []
