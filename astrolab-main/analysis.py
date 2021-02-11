@@ -117,7 +117,6 @@ for i in np.arange(10.5, 24.0, 0.5):
     m_binned.append((2*i + 0.5)/2)
 
     vals_binned.append(np.mean(data[lower:upper]))
-    print(data[lower:upper])
     
 plt.figure()
 plt.scatter(m_binned, vals_binned, label='Binned data points from scanning full image', marker='x')
