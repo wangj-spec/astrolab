@@ -108,9 +108,6 @@ plt.show()
 # Binning values 
 m_vals, data = [mpix[:-1], lognm[:-1]]
 
-print(data)
-print(m_vals)
-
 m_binned = []
 vals_binned=[]
 
