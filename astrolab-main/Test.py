@@ -253,7 +253,7 @@ y, x = np.indices(imshape2) # Creating the meshgrid
 
 np.random.seed(7) # Seeding the random number generator, different seeds will create different skies
 
-# Setting the number of randomly generated galaxies to 500    
+# Setting the number of randomly generated galaxies to 1    
 N = 1
 model_params = [
     dict(amplitude=np.random.uniform(8000, 10000), 
