@@ -314,14 +314,13 @@ def var_aperture(array, source_lim, rad_lim, centered=False, minsize=2):
     where = []  # coordinates of pixels in each galaxy
     while i:
         maxval = np.amax(array)
-        print('pixel value of galaxy = '+str(maxval))
         if maxval <= source_lim:
             break
 
         else:
             where1 = np.argmax(array)  # returns index in flattened arraycopy for first occurrence of maxval
             where2 = np.unravel_index(where1, array.shape)  # back to a 2d coord
-            print('location of galaxy = ' +str(where2))
+            print('Galaxy found at ' +str(where2))
 
             values, where3, lightsum, bg_values, array = findradiusandmask(array, (where2[1], where2[0]), minsize, rad_lim)
 
@@ -330,7 +329,6 @@ def var_aperture(array, source_lim, rad_lim, centered=False, minsize=2):
 
             bg_av = np.median(bg_values)
             values = [e - bg_av for e in values]
-            print(lightsum - len(values) * bg_av)
             if lightsum - len(values) * bg_av < 0: #if the overall flux counted comes out to be
                                                   # negative, this is a clearly unphysical result
                                                     # which is due to the flaws in our method
