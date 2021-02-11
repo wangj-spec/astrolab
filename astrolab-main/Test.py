@@ -221,7 +221,7 @@ plt.xlabel('x coordinates')
 plt.ylabel('y coordinates')
 plt.title('Simulated sky with N = 500 Sources')
 plt.colorbar(label = 'Pixel brightness value')
-plt.legend()
+plt.show()
 
 # Running the variable aperature on the image
 test_gaussian = gal.var_aperture(full_image, 3500, 3470, False, 2)
@@ -233,7 +233,7 @@ plt.xlabel('x coordinates')
 plt.ylabel('y coordinates')
 plt.title('Simulated sky with N = 500 Sources')
 plt.colorbar(label = 'Pixel brightness value')
-plt.legend()
+plt.show()
 
 # The total flux from the simulated galaxies (subtacting the background values)
 real_flux = flux - (500 * 500 * 3420)
@@ -281,7 +281,7 @@ plt.xlabel('x coordinates')
 plt.ylabel('y coordinates')
 plt.title('Simulated galaxy')
 plt.colorbar(label = 'Pixel brightness value')
-plt.legend()
+plt.show()
 
 fixedap_test = gal.fixed_aperture(one_galaxy, 3500, 7)
 
@@ -291,7 +291,8 @@ plt.xlabel('x coordinates')
 plt.ylabel('y coordinates')
 plt.title('Simulated galaxy masked with fixed aperture')
 plt.colorbar(label = 'Pixel brightness value')
-plt.legend()
+
+plt.show()
 
 print('Total number of galaxies detected for fixed aperature method = '+str(len(fixedap_test[0])))
 
@@ -305,8 +306,7 @@ plt.xlabel('x coordinates')
 plt.ylabel('y coordinates')
 plt.title('Simulated galaxy masked with variable aperture')
 plt.colorbar(label = 'Pixel brightness value')
-plt.legend()
-
+plt.show()
 print('Variable aperture finds '+str((len(varap_test[0])))+ ' galaxy, as expected')
 
 
