@@ -18,7 +18,7 @@ radiuslim = 3443    # Masking radius limit
 
 # Masking unwanted areas of images and saving the file.
 original_data, header = gal.openfits("mosaic.fits")
-#maskeddata = gal.maskstars(original_data)
+#maskeddata = gal.maskstars(original_data) this is done for you, but feel free to do it again.
 data = gal.openccd("starsmasked.fits")
 
 data1dmod = original_data[original_data < 6000] # removing values larger than 6000  
